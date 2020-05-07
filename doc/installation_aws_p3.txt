@@ -1,0 +1,6 @@
+source activate tensorflow2_p36
+
+conda install -c menpo opencv
+conda install pydot
+conda install imageio
+python3 -m pip install gin-config
