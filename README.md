@@ -59,3 +59,4 @@ Train model
          ├── scrabble_gan.gin                           # all dependencies are handled here (gin config file)
     
  ## License
+ [License](LICENSE)
