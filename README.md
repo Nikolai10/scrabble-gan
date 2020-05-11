@@ -6,6 +6,8 @@ Implementation of [ScrabbleGAN](https://arxiv.org/pdf/2003.10557.pdf) for advers
   <img src="doc/ScrabbleGan_no_grad_bal.gif" />
 </p>
 
+[More details can be found here](https://towardsdatascience.com/scrabblegan-adversarial-generation-of-handwritten-text-images-628f8edcfeed)
+
  ## Implementational notes
  
  - the BigGAN-part/ structure of ScrabbleGAN is based on [google/compare_gan](https://github.com/google/compare_gan/blob/master/compare_gan/architectures/resnet_biggan.py) rewritten in TF2
