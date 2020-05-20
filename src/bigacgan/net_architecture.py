@@ -153,7 +153,7 @@ def make_generator(latent_dim, input_dim, embed_y, gen_path, kernel_reg, blocks_
         is_last_block = block_idx == num_blocks - 1
         net = ResNetBlockUp(name, out_channels[block_idx], is_last_block, z_per_block[block_idx], kernel_reg).call(net)
         if name in blocks_with_attention:
-            net = NonLocalBlock(name, kernel_reg).call(net)
+            net = NonLocalBlock(name, kernel_reg)(net)
 
     net = layers.BatchNormalization()(net)
     net = tf.nn.relu(net)
@@ -212,7 +212,7 @@ def make_discriminator(gen_path, input_dim, kernel_reg, blocks_with_attention, v
         is_last_block = block_idx == num_blocks - 1
         net = ResNetBlockDown(name, out_channels[block_idx], is_last_block, kernel_reg).call(net)
         if name in blocks_with_attention:
-            net = NonLocalBlock(name, kernel_reg).call(net)
+            net = NonLocalBlock(name, kernel_reg)(net)
 
     # Final part
     net = tf.nn.relu(net)
@@ -295,3 +295,4 @@ def get_in_out_channels_disc(colors=1, resolution=32):
     out_channels = [ch * c for c in channel_multipliers]
     in_channels = [colors] + out_channels[:-1]
     return in_channels, out_channels
+

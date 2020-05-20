@@ -19,6 +19,12 @@ class NonLocalBlock(layers.Layer):
         super(NonLocalBlock, self).__init__(name='NonLocalBlock' + '_' + name)
         self.k_reg = k_reg
 
+    def build(self, input_shape):
+        self.sigma = self.add_weight(name="sigma",
+                                     shape=[],
+                                     initializer='zeros',
+                                     trainable=True)
+
     def _spatial_flatten(self, inputs):
         shape = inputs.shape
         return tf.reshape(inputs, (tf.shape(inputs)[0], -1, shape[3]))
@@ -58,32 +64,11 @@ class NonLocalBlock(layers.Layer):
                                padding='same', kernel_initializer=tf.initializers.orthogonal(),
                                kernel_regularizer=self.k_reg, name="conv2d_attn_g")(attn_g)
 
-        attn_g = ScalarLayer('non-local-block-scalar')(attn_g)
-        return input + attn_g
+        return self.sigma * attn_g + input
 
     def get_config(self):
         config = super(NonLocalBlock, self).get_config()
-        config.update({'k_reg': self.k_reg})
-        return config
-
-
-class ScalarLayer(layers.Layer):
-
-    def __init__(self, name):
-        super(ScalarLayer, self).__init__(name=name)
-
-    def build(self, input_shape):
-        self.sigma = self.add_weight(name="sigma",
-                                     shape=[],
-                                     initializer='zeros',
-                                     trainable=True)
-
-    def call(self, inputs):
-        return self.sigma * inputs
-
-    def get_config(self):
-        config = super(ScalarLayer, self).get_config()
-        config.update({})
+        config.update({'k_reg': self.k_reg, 'sigma': self.sigma})
         return config
 
 
@@ -139,3 +124,4 @@ def spectral_norm(w, power_iteration=1):
     w_norm = tf.reshape(w_norm, w_shape)
 
     return w_norm
+
