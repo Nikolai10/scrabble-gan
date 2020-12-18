@@ -13,7 +13,7 @@ Implementation of [ScrabbleGAN](https://arxiv.org/pdf/2003.10557.pdf) for advers
  - the BigGAN-part/ structure of ScrabbleGAN is based on [google/compare_gan](https://github.com/google/compare_gan/blob/master/compare_gan/architectures/resnet_biggan.py) rewritten in TF2
  - all dependencies (batch size, epochs etc.) are handled using google [gin-config](src/scrabble_gan.gin)
     
- ## Setup
+ ## Setup (only tested on MacOS)
  
  1. Download and extract [IAM-Handwriting DB](http://www.fki.inf.unibe.ch/databases/iam-handwriting-database/download-the-iam-handwriting-database) 
  and [random word list](https://www.dropbox.com/s/o60ubzh3m163j0x/random_words.txt?dl=0) as described in src/dinterface/dinterface.py
