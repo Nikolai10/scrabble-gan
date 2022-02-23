@@ -6,12 +6,10 @@ Implementation of [ScrabbleGAN](https://arxiv.org/pdf/2003.10557.pdf) for advers
   <img src="doc/ScrabbleGan_no_grad_bal.gif" />
 </p>
 
-[More details can be found here](https://towardsdatascience.com/scrabblegan-adversarial-generation-of-handwritten-text-images-628f8edcfeed)
+ ## Try it out!
+ [<img src="https://colab.research.google.com/assets/colab-badge.svg" align="center">](https://colab.research.google.com/drive/1-JxJsYbAM9W69nTxSKTp-gR3ofwv5SjM?usp=sharing)
 
- ## Implementational notes
- 
- - the BigGAN-part/ structure of ScrabbleGAN is based on [google/compare_gan](https://github.com/google/compare_gan/blob/master/compare_gan/architectures/resnet_biggan.py) rewritten in TF2
- - all dependencies (batch size, epochs etc.) are handled using google [gin-config](src/scrabble_gan.gin)
+ Example on how to train ScrabbleGAN + how to generate images. [More details can be found here](https://towardsdatascience.com/scrabblegan-adversarial-generation-of-handwritten-text-images-628f8edcfeed).
     
  ## Setup (only tested on MacOS)
  
