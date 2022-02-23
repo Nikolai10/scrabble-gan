@@ -18,32 +18,48 @@ class NonLocalBlock(layers.Layer):
     def __init__(self, name, k_reg):
         super(NonLocalBlock, self).__init__(name='NonLocalBlock' + '_' + name)
         self.k_reg = k_reg
+        b_init = tf.zeros_initializer()
+        self.sigma = tf.Variable(
+            initial_value=b_init(shape=[], dtype="float32"), trainable=True
+        )
 
     def build(self, input_shape):
-        self.sigma = self.add_weight(name="sigma",
-                                     shape=[],
-                                     initializer='zeros',
-                                     trainable=True)
+        print('input shape'.format(input_shape))
+        #self.sigma = self.add_weight(name="sigma",
+        #                             shape=[],
+        #                             initializer='zeros',
+        #                             trainable=True)
+        h, w, num_channels = input_shape.as_list()[1:]
+        self.h = h
+        self.w = w
+        self.num_channels = num_channels
+        self.num_channels_attn = self.num_channels // 8
+        self.num_channels_g = self.num_channels // 2
+        self.conv2d_1 = layers.Conv2D(filters=self.num_channels_attn, kernel_size=(1, 1), use_bias=False, strides=(1, 1),
+                              padding='same', kernel_initializer=tf.initializers.orthogonal(),
+                              kernel_regularizer=self.k_reg, name="conv2d_theta")
+        self.conv2d_2 = layers.Conv2D(filters=self.num_channels_attn, kernel_size=(1, 1), use_bias=False, strides=(1, 1),
+                            padding='same', kernel_initializer=tf.initializers.orthogonal(),
+                            kernel_regularizer=self.k_reg, name="conv2d_phi")
+        self.conv2d_3 = layers.Conv2D(filters=self.num_channels_g, kernel_size=(1, 1), use_bias=False, strides=(1, 1),
+                          padding='same', kernel_initializer=tf.initializers.orthogonal(),
+                          kernel_regularizer=self.k_reg, name="conv2d_g")
+        self.conv2d_4 = layers.Conv2D(filters=self.num_channels, kernel_size=(1, 1), use_bias=False, strides=(1, 1),
+                               padding='same', kernel_initializer=tf.initializers.orthogonal(),
+                               kernel_regularizer=self.k_reg, name="conv2d_attn_g")
 
     def _spatial_flatten(self, inputs):
         shape = inputs.shape
         return tf.reshape(inputs, (tf.shape(inputs)[0], -1, shape[3]))
 
     def call(self, input):
-        h, w, num_channels = input.get_shape().as_list()[1:]
-        num_channels_attn = num_channels // 8
-        num_channels_g = num_channels // 2
-
+  
         # Theta path
-        theta = layers.Conv2D(filters=num_channels_attn, kernel_size=(1, 1), use_bias=False, strides=(1, 1),
-                              padding='same', kernel_initializer=tf.initializers.orthogonal(),
-                              kernel_regularizer=self.k_reg, name="conv2d_theta")(input)
+        theta = self.conv2d_1(input)
         theta = self._spatial_flatten(theta)
 
         # Phi path
-        phi = layers.Conv2D(filters=num_channels_attn, kernel_size=(1, 1), use_bias=False, strides=(1, 1),
-                            padding='same', kernel_initializer=tf.initializers.orthogonal(),
-                            kernel_regularizer=self.k_reg, name="conv2d_phi")(input)
+        phi = self.conv2d_2(input)
         phi = layers.MaxPool2D(pool_size=[2, 2], strides=2)(phi)
         phi = self._spatial_flatten(phi)
 
@@ -52,23 +68,21 @@ class NonLocalBlock(layers.Layer):
         attn = tf.nn.softmax(attn)
 
         # G path
-        g = layers.Conv2D(filters=num_channels_g, kernel_size=(1, 1), use_bias=False, strides=(1, 1),
-                          padding='same', kernel_initializer=tf.initializers.orthogonal(),
-                          kernel_regularizer=self.k_reg, name="conv2d_g")(input)
+        g = self.conv2d_3(input)
         g = layers.MaxPool2D(pool_size=[2, 2], strides=2)(g)
         g = self._spatial_flatten(g)
 
         attn_g = tf.matmul(attn, g)
-        attn_g = tf.reshape(attn_g, [tf.shape(attn_g)[0], h, -1, num_channels_g])
-        attn_g = layers.Conv2D(filters=num_channels, kernel_size=(1, 1), use_bias=False, strides=(1, 1),
-                               padding='same', kernel_initializer=tf.initializers.orthogonal(),
-                               kernel_regularizer=self.k_reg, name="conv2d_attn_g")(attn_g)
+        attn_g = tf.reshape(attn_g, [tf.shape(attn_g)[0], self.h, -1, self.num_channels_g])
+        attn_g = self.conv2d_4(attn_g)
 
         return self.sigma * attn_g + input
 
     def get_config(self):
         config = super(NonLocalBlock, self).get_config()
-        config.update({'k_reg': self.k_reg, 'sigma': self.sigma})
+        config.update({'k_reg': self.k_reg, 'sigma': self.sigma.numpy(), 'h': self.h, 'w': self.w, 
+        'num_channels': self.num_channels, 'num_channels_attn': self.num_channels_attn, 'num_channels_g': self.num_channels_g, 
+        'conv2d_1': self.conv2d_1, 'conv2d_2': self.conv2d_2, 'conv2d_3': self.conv2d_3, 'conv2d_4': self.conv2d_4})
         return config
 
 
