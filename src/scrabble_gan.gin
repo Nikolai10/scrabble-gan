@@ -12,7 +12,7 @@ setup_optimizer.disc_iters=1                    #2
 
 # Shared specs (G and D)
 shared_specs.epochs = 15
-shared_specs.batch_size = 64
+shared_specs.batch_size = 32                    
 shared_specs.latent_dim = 128
 shared_specs.embed_y = (32, 8192)
 shared_specs.num_gen = 16
@@ -21,7 +21,7 @@ shared_specs.g_bw_attention = 'B3'              #'B_skip'
 shared_specs.d_bw_attention = 'B1'              #'B_skip'
 
 # I/O and data structure
-io.base_path = '/home/ubuntu/workspace/scrabble-gan'
+io.base_path = '/content/scrabble-gan'
 io.checkpoint_dir = '/res/out/big_ac_gan/training_checkpoints'
 io.gen_imgs_dir = '/res/out/big_ac_gan/images/'
 io.model_dir = '/res/out/big_ac_gan/model/'
